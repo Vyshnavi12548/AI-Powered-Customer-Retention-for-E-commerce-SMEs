@@ -1,4 +1,4 @@
-#Flux Flow - AI-Powered Customer Churn Predictor (MVP)
+##Flux Flow - AI-Powered Customer Churn Predictor (MVP)
 
 ## 🚀 Overview
 
