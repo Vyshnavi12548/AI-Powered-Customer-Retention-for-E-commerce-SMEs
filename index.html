@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Customer Churn Predictor</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; background-color: #f4f4f4; }
+        .container { max-width: 600px; margin: auto; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
+        h1 { text-align: center; color: #333; }
+        label { display: block; margin-bottom: 5px; font-weight: bold; }
+        input[type="text"], input[type="number"], select {
+            width: calc(100% - 22px);
+            padding: 10px;
+            margin-bottom: 15px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        button {
+            background-color: #007bff;
+            color: white;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            width: 100%;
+        }
+        button:hover { background-color: #0056b3; }
+        #result { margin-top: 20px; padding: 15px; border: 1px solid #e0e0e0; border-radius: 4px; background-color: #e9e9e9; }
+        .error { color: red; font-weight: bold; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Customer Churn Predictor MVP</h1>
+        <p>Enter customer data to get a churn prediction.</p>
+        <form id="predictionForm">
+            <label for="customer_id">Customer ID:</label>
+            <input type="text" id="customer_id" value="CUST_0010" required><br>
+
+            <label for="total_spent">Total Spent (₹):</label>
+            <input type="number" id="total_spent" value="1500" required><br>
+
+            <label for="num_orders">Number of Orders:</label>
+            <input type="number" id="num_orders" value="2" required><br>
+
+            <label for="avg_order_value">Avg Order Value (₹):</label>
+            <input type="number" id="avg_order_value" value="750" required><br>
+
+            <label for="recency_days">Recency (Days since last purchase):</label>
+            <input type="number" id="recency_days" value="90" required><br>
+
+            <label for="product_category_pref">Preferred Product Category:</label>
+            <select id="product_category_pref" required>
+                <option value="Apparel">Apparel</option>
+                <option value="Electronics">Electronics</option>
+                <option value="Home Goods">Home Goods</option>
+                <option value="Books">Books</option>
+                <option value="Groceries">Groceries</option>
+            </select><br>
+
+            <label for="marketing_channel">Marketing Channel:</label>
+            <select id="marketing_channel" required>
+                <option value="Email">Email</option>
+                <option value="Social Media">Social Media</option>
+                <option value="Referral">Referral</option>
+                <option value="Paid Ads">Paid Ads</option>
+            </select><br>
+
+            <button type="submit">Get Prediction</button>
+        </form>
+
+        <div id="result">
+            <strong>Prediction Result:</strong> <span id="predictionResult"></span><br>
+            <strong>Churn Probability:</strong> <span id="churnProbability"></span>
+        </div>
+        <div id="error" class="error"></div>
+    </div>
+
+    <script>
+        document.getElementById('predictionForm').addEventListener('submit', async function(event) {
+            event.preventDefault();
+
+            const customerData = {
+                customer_id: document.getElementById('customer_id').value,
+                total_spent: parseFloat(document.getElementById('total_spent').value),
+                num_orders: parseInt(document.getElementById('num_orders').value),
+                avg_order_value: parseFloat(document.getElementById('avg_order_value').value),
+                recency_days: parseInt(document.getElementById('recency_days').value),
+                product_category_pref: document.getElementById('product_category_pref').value,
+                marketing_channel: document.getElementById('marketing_channel').value
+            };
+
+            document.getElementById('error').textContent = ''; // Clear previous errors
+
+            try {
+                const response = await fetch('/predict', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(customerData)
+                });
+
+                const result = await response.json();
+
+                if (response.ok) {
+                    document.getElementById('predictionResult').textContent = result.prediction_status;
+                    document.getElementById('churnProbability').textContent = result.churn_probability;
+                } else {
+                    document.getElementById('predictionResult').textContent = '';
+                    document.getElementById('churnProbability').textContent = '';
+                    document.getElementById('error').textContent = `Error: ${result.error || 'Unknown error'}`;
+                }
+
+            } catch (error) {
+                document.getElementById('predictionResult').textContent = '';
+                document.getElementById('churnProbability').textContent = '';
+                document.getElementById('error').textContent = `Network error: ${error.message}`;
+                console.error('Fetch error:', error);
+            }
+        });
+    </script>
+</body>
+</html>
